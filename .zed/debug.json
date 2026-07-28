@@ -1,0 +1,24 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+      "label": "New task",
+      "request": "launch",
+      "adapter": "Delve",
+      "mode": "debug",
+      // For Delve, the program can be a package name
+      "program": ".",
+      "args": [
+        "new",
+        "today",
+        "task",
+        "test",
+        "-s",
+        "today"
+      ],
+      "cwd": "/home/kirill/dev/gotask"
+      // "buildFlags": [],
+    }
+]
