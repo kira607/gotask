@@ -36,14 +36,14 @@ func newId() Id {
 }
 
 type Task struct {
-	Id          Id
-	Title       string
-	Completed   bool
-	Priority    Priority
-	Scheduled   *time.Time
-	Due         *time.Time
-	CreatedAt   time.Time
-	CompletedAt *time.Time
+	Id          Id         `json:"id"`
+	Title       string     `json:"title"`
+	Completed   bool       `json:"completed"`
+	Priority    Priority   `json:"priority"`
+	Scheduled   *time.Time `json:"scheduled"`
+	Due         *time.Time `json:"due"`
+	CreatedAt   time.Time  `json:"created_at"`
+	CompletedAt *time.Time `json:"completed_at"`
 }
 
 func formatDateField(label string, t *time.Time) string {
@@ -75,7 +75,7 @@ func (t *Task) String() string {
 }
 
 // Toggle task completion
-// 
+//
 // Also changes CompletedAt - to now if done, to nil if not done
 func (t *Task) Toggle() {
 	if t.Completed {
