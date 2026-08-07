@@ -27,43 +27,72 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // In-memory Tasks collection.
 type Tasks struct {
+	mu    sync.RWMutex
 	tasks map[Id]*Task
 }
 
 // Create a new task with a given title
 func (t *Tasks) New(title string) *Task {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	task := MakeTask(title)
 	t.tasks[task.Id] = task
 	return task
 }
 
+// Get a task by ID
+func (t *Tasks) Get(id Id) (*Task, bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	task, ok := t.tasks[id]
+	return task, ok
+}
+
 // Add a new task
 func (t *Tasks) Add(task *Task) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	t.tasks[task.Id] = task
 }
 
 // Remove a task by id
 func (t *Tasks) Remove(id Id) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	delete(t.tasks, id)
 }
 
 // Update a task by id
 func (t *Tasks) Update(id Id, updated *Task) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	updated.Id = id
 	t.tasks[id] = updated
 }
 
 // Get all tasks
 func (t *Tasks) All() []*Task {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
 	return t.Filter()
 }
 
 // Get a slice of tasks each of which match all filters given.
 func (t *Tasks) Filter(fs ...Filter) []*Task {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
 	var result []*Task
 
 	for _, task := range t.tasks {
@@ -91,13 +120,11 @@ func (t *Tasks) Today() []*Task {
 	return t.Filter(Today())
 }
 
-// Get a slice of overdue tasks
-func (t *Tasks) Overdue() []*Task {
-	return t.Filter(Overdue())
-}
-
 // Find a task by Id prefix
 func (t *Tasks) FindByPrefix(prefix string) (*Task, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	var matches []*Task
 	for id, task := range t.tasks {
 		if strings.HasPrefix(string(id), prefix) {
@@ -114,11 +141,22 @@ func (t *Tasks) FindByPrefix(prefix string) (*Task, error) {
 	}
 }
 
+// Get a slice of overdue tasks
+func (t *Tasks) Overdue() []*Task {
+	return t.Filter(Overdue())
+}
+
 func (t *Tasks) MarshalJSON() ([]byte, error) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
 	return json.Marshal(t.tasks)
 }
 
 func (t *Tasks) UnmarshalJSON(data []byte) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	var tasks map[Id]*Task
 	if err := json.Unmarshal(data, &tasks); err != nil {
 		return err
