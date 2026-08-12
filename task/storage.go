@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 )
 
+// Get a default tasks file path
 func DefaultTasksPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -39,16 +40,28 @@ func DefaultTasksPath() (string, error) {
 
 func (t *Tasks) LoadFromFile(path string) error {
 	data, err := os.ReadFile(path)
+
+	// no file yet — start empty
 	if os.IsNotExist(err) {
-		t.tasks = make(map[Id]*Task) // no file yet — start empty
+		t.tasks = make(map[Id]*Task)
 		return nil
 	}
+
+	// empty file causes unmarshal error
+	if len(data) == 0 {
+		t.tasks = make(map[Id]*Task)
+		return nil
+	}
+
+	// not handling other errors...
 	if err != nil {
 		return fmt.Errorf("read tasks file: %w", err)
 	}
+
 	if err := json.Unmarshal(data, t); err != nil {
 		return fmt.Errorf("unmarshal tasks: %w", err)
 	}
+
 	return nil
 }
 
