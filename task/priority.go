@@ -69,7 +69,7 @@ func (p Priority) String() string {
 func ParsePriority(v string) (Priority, error) {
 	var p Priority
 	var e error = nil
-	switch v {
+	switch strings.ToLower(v) {
 	case "none":
 		p = PriorityNone
 	case "low":
