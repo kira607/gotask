@@ -46,22 +46,12 @@ func (f *priorityFlag) String() string {
 	return f.value.String()
 }
 
-
 func (f *priorityFlag) Set(value string) error {
-	switch value {
-	case "none":
-		*f.value = task.PriorityNone
-	case "low":
-		*f.value = task.PriorityLow
-	case "medium":
-		*f.value = task.PriorityMedium
-	case "high":
-		*f.value = task.PriorityHigh
-	case "urgent":
-		*f.value = task.PriorityUrgent
-	default:
-		return fmt.Errorf("must be one of: %s (got %q)\n", task.PrioritiesString(), value)
+	p, e := task.ParsePriority(value)
+	if e != nil {
+		return e
 	}
+	*f.value = p
 	return nil
 }
 

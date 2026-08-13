@@ -23,6 +23,8 @@ THE SOFTWARE.
 package task
 
 import (
+	"encoding/json"
+	"fmt"
 	"slices"
 	"strings"
 )
@@ -64,6 +66,26 @@ func (p Priority) String() string {
 	}
 }
 
+func ParsePriority(v string) (Priority, error) {
+	var p Priority
+	var e error = nil
+	switch v {
+	case "none":
+		p = PriorityNone
+	case "low":
+		p = PriorityLow
+	case "medium":
+		p = PriorityMedium
+	case "high":
+		p = PriorityHigh
+	case "urgent":
+		p = PriorityUrgent
+	default:
+		e = fmt.Errorf("must be one of: %s (got %q)\n", PrioritiesString(), v)
+	}
+	return p, e
+}
+
 // Check if a priority has a valid value
 func (p Priority) IsValid() bool {
 	return slices.Contains(AllPriorities, p)
@@ -75,4 +97,23 @@ func PrioritiesString() string {
 		names[i] = p.String()
 	}
 	return strings.Join(names, ", ")
+}
+
+func (p Priority) MarshalJSON() ([]byte, error) {
+	return json.Marshal(p.String())
+}
+
+func (p *Priority) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	parsed, err := ParsePriority(s)
+	if err != nil {
+		return err
+	}
+
+	*p = parsed
+	return nil
 }
