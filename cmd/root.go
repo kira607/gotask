@@ -32,7 +32,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "task",
+	Use:   "gotask",
 	Short: "Tasks list management CLI",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
